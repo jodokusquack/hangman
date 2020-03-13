@@ -4,10 +4,13 @@ class Game
   end
 
   def play()
+    system "clear"
+    @player = create_player
+    @codeword = create_codeword
+
     continue = true
     while continue == true
       system "clear"
-      start_round
       play_round
       continue = continue?
     end
@@ -15,14 +18,34 @@ class Game
 
   private
 
-  def start_round()
-    #@player = create_player
-    #@secret_word = create_secret_word
-    puts "Setting up a game..."
+  def create_player()
+    puts "Who is playing?"
+    name = gets.chomp 
+    if name == ""
+      name = "Jakob"
+    end
+    player = Player.new(name)
+    puts "Setting up a game for #{name}"
+
+    return player
+  end
+
+  def create_codeword()
+    return Codeword.new()
   end
 
   def play_round()
-    puts "Playing the game. In my head..."
+    @codeword.set_new_codeword
+
+    guesses_left = 10
+
+    while guesses_left > 0
+
+      @codeword.take_guess(@player.guess)
+      break if @codeword.guessed?
+
+      guesses_left -= 1
+    end
   end
 
   def continue?
