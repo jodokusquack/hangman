@@ -4,15 +4,18 @@ class Game
   end
 
   def play()
-    system "clear"
-    @player = create_player
-    @codeword = create_codeword
+    begin
+      @player = create_player
+      @codeword = create_codeword
 
-    continue = true
-    while continue == true
-      system "clear"
-      play_round
-      continue = continue?
+      continue = true
+      while continue == true
+        system "clear"
+        play_round
+        continue = continue?
+      end
+    rescue Interrupt
+      abort "Thanks for playing"
     end
   end
 
@@ -40,8 +43,10 @@ class Game
     guesses_left = 10
 
     while guesses_left > 0
+      puts "Guesses left: #{guesses_left}"
 
-      @codeword.take_guess(@player.guess)
+      correct = @codeword.take_guess(@player.guess)
+      puts @codeword.to_s
       break if @codeword.guessed?
 
       guesses_left -= 1

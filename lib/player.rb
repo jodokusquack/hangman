@@ -23,7 +23,7 @@ class Player
       end 
     end
     
-    @guesses.append(guess)
+    @guesses << guess
 
     return guess
 
