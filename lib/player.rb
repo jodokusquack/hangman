@@ -1,14 +1,20 @@
 class Player
   LETTERS = ('a'..'z').to_a
 
-  def initialize(name)
+  def initialize(name, guesses=[])
     @name = name
-    @guesses = []
+    @guesses = guesses
   end
 
   def guess()
     puts "Your guess: "
     guess = gets.chomp.downcase
+
+    # special case that you want to save
+    # the game
+    if guess == 'save'
+      return guess
+    end
 
     # consider that the player can enter
     # something else than expected...
