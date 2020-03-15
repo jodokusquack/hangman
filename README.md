@@ -13,7 +13,7 @@ git clone https://github.com/jodokusquack/hangman.git
 
 and then execute "hangman.rb".
 
-Alternatively you can play it on [repl.it](https://repl.it/@jodokusquack/hangman). 
+Alternatively you can play it on [repl.it](https://repl.it/@jodokusquack/hangman).
 But you might be deleting other peoples games on there ;)
 
 I made this game as a project from the curriculum by [The Odin
