@@ -1,7 +1,7 @@
 class Game
 
   SAVED_GAMES_PATH = File.expand_path("../../saved_games", __FILE__)
-  MAX_GUESSES = 10
+  MAX_GUESSES = 7
 
   def initialize()
     # check if the SAVED_GAMES dir exists or create it of not
