@@ -3,7 +3,7 @@ class Game
   SAVED_GAMES_PATH = File.expand_path("../../saved_games", __FILE__)
   MAX_GUESSES = 10
 
-  def inititalize()
+  def initialize()
     # check if the SAVED_GAMES dir exists or create it of not
     if !Dir.exist?(SAVED_GAMES_PATH)
       Dir.mkdir(SAVED_GAMES_PATH)
@@ -96,7 +96,50 @@ Do you want to load a saved game or start a new one?
     end
   end
 
-  # TODO move save function to the Game class
+  def save_game()
+    #create a hash of the current state
+    save_state = {
+      codeword: @codeword.codeword,
+      guesses: @codeword.guesses,
+      correct_guesses: @codeword.correct_guesses,
+    }
+
+    #create an array of already existing saved games
+    saved_games = Dir.glob("*.json", base: SAVED_GAMES_PATH)
+
+    #if there are already 3 saved games,
+    #overwrite one
+    if saved_games.length == 3
+      puts "You can only save 3 games at a time."
+      puts "Which game do you want to overwrite? (Enter any non-number to cancel)"
+      num = gets.chomp.downcase
+
+      if !!/\A\d+\z/.match(num)
+        file_name = "save_#{num.to_s}.json"
+      else
+        puts "Cancelled."
+        return
+      end
+    else
+      # if there are less than 3 games
+      # saved, find the next free number
+      (1..3).each do |num|
+        if saved_games.include?("save_#{num}.json")
+          next
+        end
+        file_name = "save_#{num}.json"
+        break
+      end
+    end
+    # save the object to a file
+    file_path = File.join(SAVED_GAMES_PATH, file_name)
+    File.write(file_path, JSON.generate(save_state))
+
+    puts "Saved as Game ##{File.basename(file_path, ".json").split("_")[1]
+}"
+    puts
+  end
+
   def setup(player_name, file)
     # create @player and @codeword either new or from a saved_game
     if file == 'new'
@@ -108,11 +151,11 @@ Do you want to load a saved game or start a new one?
     else
       file_contents = File.read(File.join(SAVED_GAMES_PATH, file))
       game = JSON.parse(file_contents)
-
       @player = Player.new(player_name, game["guesses"])
       @codeword = Codeword.new(game)
 
-      @guesses_left = MAX_GUESSES - game["guesses"].length
+      @guesses_left =
+        MAX_GUESSES - game["guesses"].length + game["correct_guesses"].length
     end
 
   end
@@ -124,7 +167,24 @@ Do you want to load a saved game or start a new one?
       puts @codeword.to_s
 
       puts "Guesses left: #{@guesses_left}"
-      result = @codeword.take_guess(@player.guess)
+
+      # get the player guess and check if game should be saved
+      guess = @player.guess
+      if guess == 'save'
+        save_game
+
+        # ask the player if he/she wants to continue
+        puts "Do you want to continue playing? [y/N]"
+
+        ans = gets.chomp.downcase
+        if ans[0] == "y"
+          next
+        else
+          abort "Thanks for playing"
+        end
+      else
+        result = @codeword.take_guess(guess)
+      end
 
       # end the game if the word was guessed
       break if @codeword.guessed?

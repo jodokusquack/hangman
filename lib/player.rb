@@ -13,7 +13,7 @@ class Player
     # special case that you want to save
     # the game
     if guess == 'save'
-      return guess
+      return 'save'
     end
 
     # consider that the player can enter
@@ -23,7 +23,9 @@ class Player
       while validated == false
         puts "Please enter a single letter that you haven't used before."
         guess = gets.chomp.downcase
-        if LETTERS.include?(guess) and !@guesses.include?(guess)
+        if guess == 'save'
+          return 'save'
+        elsif LETTERS.include?(guess) and !@guesses.include?(guess)
           validated = true
         end
       end 

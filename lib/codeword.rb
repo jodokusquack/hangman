@@ -3,7 +3,7 @@ class Codeword
   DICT_PATH = File.join(__dir__, "../dictionary/5desk.txt")
   SAVED_GAMES_PATH = File.expand_path("../../saved_games", __FILE__)
 
-  attr_reader :codeword, :guesses
+  attr_reader :codeword, :guesses, :correct_guesses
 
   def initialize(game={})
     @words = File.readlines(DICT_PATH)
@@ -27,18 +27,10 @@ class Codeword
     @codeword = game["codeword"]
     @letters = @codeword.split("")
     @guesses = game["guesses"]
-    @correct_guesses = @guesses & @letters
+    @correct_guesses = game["correct_guesses"]
   end
 
   def take_guess(guess)
-    # special case if the player wants to save
-    if guess == 'save'
-      puts "Saving game"
-      self.save
-      puts "Saved!"
-      return 'save'
-    end
-
     @guesses.append(guess)
 
     # compare with word and return true if
@@ -98,48 +90,6 @@ class Codeword
     return string.center(24) + alphabet + "\n\n"
   end
 
-  def save()
-    #create a hash of the current state
-    word = {
-      codeword: @codeword,
-      guesses: @guesses
-    }
-
-    #create an array of already existing saved games
-    saved_games = Dir.glob("*.json", base: SAVED_GAMES_PATH)
-    puts saved_games
-    # create a file for the data
-
-
-    #if there are already 3 saved games,
-    #overwrite one
-    if saved_games.length == 3
-      puts "You can only save 10 games at a time."
-      puts "Which game do you want to overwrite? (Enter any non-number to cancel)"
-      num = gets.chomp.downcase
-
-      if num.is_a?(Integer)
-        file_name = "save_#{num}.json"
-      end
-    else
-      # if there are less than 10 games
-      # saved, find the next free number
-      (1..3).each do |num|
-        if saved_games.include?("save_#{num}.json")
-          next
-        end
-        file_name = "save_#{num}.json"
-        break
-      end
-    end
-
-    # save the object to a file
-    file_path = File.join(SAVED_GAMES_PATH, file_name)
-    File.open(file_path, 'w') do |file|
-      file.puts word.to_json
-    end
-    puts "Wrote to file #{file_path}"
-  end
 
   def show()
     puts @codeword.center(24)
