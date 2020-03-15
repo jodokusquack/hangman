@@ -82,7 +82,6 @@ Do you want to load a saved game or start a new one?
     end
 
     if option == "n"
-      puts "Starting a new game!"
       return "new"
     elsif option == "d"
       # delete a game
@@ -177,6 +176,8 @@ Do you want to load a saved game or start a new one?
   def setup(player_name, file)
     # create @player and @codeword either new or from a saved_game
     if file == 'new'
+      puts "Starting a new game!"
+
       @player = Player.new(player_name)
       @codeword = Codeword.new()
 

@@ -53,16 +53,6 @@ class Codeword
   end
 
   def to_s()
-    # FIXME debug stuff
-    # puts
-    # puts "============================="
-    # p "@letters: #{@letters}"
-    # puts
-    # p "@guesses: #{@guesses}"
-    # puts
-    # p "@correct_guesses: #{@correct_guesses}"
-    # puts "============================="
-
     # create the string and reveal already guessed letters
     string = ""
     @letters.each do |letter|
@@ -104,9 +94,6 @@ class Codeword
       codeword = @words.sample.chomp
     end while
     (codeword.length < 5 or codeword.length > 12 or codeword[0] == codeword[0].upcase)
-
-    # FIXME remove after the debugging is done
-    puts codeword
 
     return codeword
   end
