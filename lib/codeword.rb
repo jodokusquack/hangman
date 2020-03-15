@@ -51,15 +51,15 @@ class Codeword
   end
 
   def to_s()
-    # REMOVE debug stuff
-    puts
-    puts "============================="
-    p "@letters: #{@letters}"
-    puts
-    p "@guesses: #{@guesses}"
-    puts
-    p "@correct_guesses: #{@correct_guesses}"
-    puts "============================="
+    # FIXME debug stuff
+    # puts
+    # puts "============================="
+    # p "@letters: #{@letters}"
+    # puts
+    # p "@guesses: #{@guesses}"
+    # puts
+    # p "@correct_guesses: #{@correct_guesses}"
+    # puts "============================="
 
     # create the string and reveal already guessed letters
     string = ""
@@ -85,7 +85,7 @@ class Codeword
       end
     end
 
-    return string.center(24) + alphabet
+    return string.center(24) + alphabet + "\n\n"
   end
 
   def save()
@@ -131,19 +131,21 @@ class Codeword
     puts "Wrote to file #{file_path}"
   end
 
+  def show()
+    puts @codeword.center(24)
+  end
+
   private
 
-  # FIXME Skip words that are capitalized!!! Because you can't guess
-  # uppercase letters
   def create_codeword()
     # select a codeword and repeat until the length is between 5 and 12
-    # characters
+    # characters or is an uppercase word
     begin
       codeword = @words.sample.chomp
     end while 
-    (codeword.length < 5 or codeword.length > 12)
+    (codeword.length < 5 or codeword.length > 12 or codeword[0] == codeword[0].upcase)
 
-    # REMOVE after the debugging is done
+    # FIXME remove after the debugging is done
     puts codeword
 
     return codeword

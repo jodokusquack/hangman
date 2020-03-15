@@ -8,14 +8,18 @@ class Game
 
   def play()
     begin
-      @player = create_player
-      @codeword = create_codeword
+      name = ask_player_name
+      display_rules(name)
 
       continue = true
       while continue == true
+        #create new codword
+        @player = Player.new(name)
+        @codeword = Codeword.new()
+
         # ask first if a game should be loaded if one exists
-        mode = load_game
-        play_round(mode)
+        file = load_game
+        play_round(file)
         # ask for another round
         continue = continue?
       end
@@ -26,13 +30,7 @@ class Game
 
   private
 
-  def create_player()
-    puts "Who is playing?"
-    name = gets.chomp 
-    if name == ""
-      name = "Jakob"
-    end
-    player = Player.new(name)
+  def display_rules(name)
     puts "
 OK #{name}! These are the rules:
 You have to guess the secret word before your guesses run out. You can guess any letter and if it is contained in the secret word it will be revealed.
@@ -40,13 +38,16 @@ You have to guess the secret word before your guesses run out. You can guess any
 If at any point you get called to the dinner table or have to save the game for any other reason, you can type 'save' and can continue playing, the next time you start the game up.
 Now, have fun and don't get hanged!"
     puts
-
-
-    return player
   end
 
-  def create_codeword()
-    return Codeword.new()
+  def ask_player_name()
+    puts "Who is playing?"
+    name = gets.chomp 
+    if name == ""
+      name = "Jakob"
+    end
+
+    return name
   end
 
   def load_game()
@@ -58,15 +59,16 @@ Now, have fun and don't get hanged!"
     # create an array for all possible options of the player
     options = ["n"]
     print "
-    Do you want to load a saved game or start a new one?
+Do you want to load a saved game or start a new one?
 
-    [n]     Start a new game
-    "
+[n]     Start a new game
+
+"
     # print all saved games as options for the player
     saved_games.each do |file|
       number = File.basename(file, ".json").split("_")[1]
-      print "
-    [#{number}]     #{File.atime(File.join(SAVED_GAMES_PATH, file)).strftime("Created at: %c")}"
+      print "[#{number}]     #{File.atime(File.join(SAVED_GAMES_PATH, file)).strftime("Created at: %c")}"
+    puts
     puts
       # add the number to the possible options
       options << number.to_s
@@ -75,14 +77,18 @@ Now, have fun and don't get hanged!"
     begin
       puts "Select one of the options above."
       option = gets.chomp.downcase
+      puts "================================"
+      puts
       raise IOError if !options.include? option
     rescue IOError
       retry
     end
 
     if option == "n"
+      puts "Starting a new game!"
       return "new"
     else
+      puts "Starting game ##{option}!"
       return "save_#{option}.json"
     end
   end
@@ -100,10 +106,13 @@ Now, have fun and don't get hanged!"
 
 
     while guesses_left > 0
-      puts "Guesses left: #{guesses_left}"
-
-      result = @codeword.take_guess(@player.guess)
+      # print codeword to screen
       puts @codeword.to_s
+
+      puts "Guesses left: #{guesses_left}"
+      result = @codeword.take_guess(@player.guess)
+
+      # end the game if the word was guessed
       break if @codeword.guessed?
 
       guesses_left -= 1 if result == false
@@ -111,8 +120,16 @@ Now, have fun and don't get hanged!"
 
     # TODO Add the show function to the codeword
     if guesses_left == 0
-      puts "The word was:"
+      puts "---------------------------------"
+      puts "Oh no, you lost! :( The word was:"
       @codeword.show
+      puts
+    else
+      puts "++++++++++++++++++++++++++++"
+      puts "Congratulations! You won! :)"
+      puts
+      @codeword.show
+      puts
     end
   end
 
