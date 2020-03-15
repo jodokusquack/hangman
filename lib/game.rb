@@ -4,6 +4,10 @@ class Game
   MAX_GUESSES = 10
 
   def inititalize()
+    # check if the SAVED_GAMES dir exists or create it of not
+    if !Dir.exist?(SAVED_GAMES_PATH)
+      Dir.mkdir(SAVED_GAMES_PATH)
+    end
   end
 
   def play()
@@ -13,13 +17,12 @@ class Game
 
       continue = true
       while continue == true
-        #create new codword
-        @player = Player.new(name)
-        @codeword = Codeword.new()
-
         # ask first if a game should be loaded if one exists
-        file = load_game
-        play_round(file)
+        file = ask_to_load_game
+        # create the @player and @codeword in setup
+        setup(name, file)
+        # play the actual game with the player and keyword
+        play_round()
         # ask for another round
         continue = continue?
       end
@@ -50,7 +53,7 @@ Now, have fun and don't get hanged!"
     return name
   end
 
-  def load_game()
+  def ask_to_load_game()
     saved_games = Dir.glob("*.json", base: SAVED_GAMES_PATH)
     if saved_games.length == 0 
       return 'new'
@@ -93,33 +96,43 @@ Do you want to load a saved game or start a new one?
     end
   end
 
-  def play_round(file)
+  # TODO move save function to the Game class
+  def setup(player_name, file)
+    # create @player and @codeword either new or from a saved_game
     if file == 'new'
-      @codeword.set_new_codeword
-      guesses_left = MAX_GUESSES
+      @player = Player.new(player_name)
+      @codeword = Codeword.new()
+
+      # reset the number of guesses
+      @guesses_left = MAX_GUESSES
     else
-      # loading the codeword should return how many guesses were already
-      # made
-      guesses = @codeword.load(file)
-      guesses_left = MAX_GUESSES - guesses
+      file_contents = File.read(File.join(SAVED_GAMES_PATH, file))
+      game = JSON.parse(file_contents)
+
+      @player = Player.new(player_name, game["guesses"])
+      @codeword = Codeword.new(game)
+
+      @guesses_left = MAX_GUESSES - game["guesses"].length
     end
 
+  end
 
-    while guesses_left > 0
+  def play_round()
+
+    while @guesses_left > 0
       # print codeword to screen
       puts @codeword.to_s
 
-      puts "Guesses left: #{guesses_left}"
+      puts "Guesses left: #{@guesses_left}"
       result = @codeword.take_guess(@player.guess)
 
       # end the game if the word was guessed
       break if @codeword.guessed?
 
-      guesses_left -= 1 if result == false
+      @guesses_left -= 1 if result == false
     end
 
-    # TODO Add the show function to the codeword
-    if guesses_left == 0
+    if @guesses_left == 0
       puts "---------------------------------"
       puts "Oh no, you lost! :( The word was:"
       @codeword.show

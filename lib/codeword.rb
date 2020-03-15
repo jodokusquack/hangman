@@ -3,12 +3,15 @@ class Codeword
   DICT_PATH = File.join(__dir__, "../dictionary/5desk.txt")
   SAVED_GAMES_PATH = File.expand_path("../../saved_games", __FILE__)
 
-  def initialize()
+  attr_reader :codeword, :guesses
+
+  def initialize(game={})
     @words = File.readlines(DICT_PATH)
 
-    # check if the SAVED_GAMES dir exists
-    if !Dir.exist?(SAVED_GAMES_PATH)
-      Dir.mkdir(SAVED_GAMES_PATH)
+    if game.empty?
+      set_new_codeword
+    else
+      load_codeword(game)
     end
 
   end
@@ -18,6 +21,13 @@ class Codeword
     @letters = @codeword.split("")
     @guesses = []
     @correct_guesses = []
+  end
+
+  def load_codeword(game)
+    @codeword = game["codeword"]
+    @letters = @codeword.split("")
+    @guesses = game["guesses"]
+    @correct_guesses = @guesses & @letters
   end
 
   def take_guess(guess)
@@ -142,7 +152,7 @@ class Codeword
     # characters or is an uppercase word
     begin
       codeword = @words.sample.chomp
-    end while 
+    end while
     (codeword.length < 5 or codeword.length > 12 or codeword[0] == codeword[0].upcase)
 
     # FIXME remove after the debugging is done
