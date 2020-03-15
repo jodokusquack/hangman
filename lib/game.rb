@@ -45,7 +45,7 @@ Now, have fun and don't get hanged!"
 
   def ask_player_name()
     puts "Who is playing?"
-    name = gets.chomp 
+    name = gets.chomp
     if name == ""
       name = "Jakob"
     end
@@ -55,27 +55,21 @@ Now, have fun and don't get hanged!"
 
   def ask_to_load_game()
     saved_games = Dir.glob("*.json", base: SAVED_GAMES_PATH)
-    if saved_games.length == 0 
+    if saved_games.length == 0
       return 'new'
     end
 
     # create an array for all possible options of the player
-    options = ["n"]
     print "
 Do you want to load a saved game or start a new one?
 
 [n]     Start a new game
 
+[d]     Delete a saved game
+
 "
-    # print all saved games as options for the player
-    saved_games.each do |file|
-      number = File.basename(file, ".json").split("_")[1]
-      print "[#{number}]     #{File.atime(File.join(SAVED_GAMES_PATH, file)).strftime("Created at: %c")}"
-    puts
-    puts
-      # add the number to the possible options
-      options << number.to_s
-    end
+    options = ["n", "d"]
+    options += display_saved_games(saved_games)
 
     begin
       puts "Select one of the options above."
@@ -90,10 +84,50 @@ Do you want to load a saved game or start a new one?
     if option == "n"
       puts "Starting a new game!"
       return "new"
+    elsif option == "d"
+      # delete a game
+      delete_game(saved_games)
+      # then call ask_to_load_game again and return the output of the
+      # next call
+      return ask_to_load_game
     else
       puts "Starting game ##{option}!"
       return "save_#{option}.json"
     end
+  end
+
+  def display_saved_games(saved_games)
+    options = []
+    # print all saved games as options for the player
+    saved_games.each do |file|
+      number = File.basename(file, ".json").split("_")[1]
+      print "[#{number}]     #{File.atime(File.join(SAVED_GAMES_PATH, file)).strftime("Created at: %c")}"
+    puts
+    puts
+      # add the number to the possible options
+      options << number.to_s
+    end
+
+    return options
+  end
+
+  def delete_game(list_of_saves)
+    puts "Which save do you want to delete?"
+    puts
+    options = display_saved_games(list_of_saves)
+
+    begin
+      puts "Select one of the options above."
+      option = gets.chomp.downcase
+      puts "================================"
+      puts
+      raise IOError if !options.include? option
+    rescue IOError
+      retry
+    end
+
+    File.delete(File.join(SAVED_GAMES_PATH, "save_#{option}.json"))
+    puts "Deleted Game ##{option}."
   end
 
   def save_game()
